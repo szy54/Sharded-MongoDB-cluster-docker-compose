@@ -1,0 +1,181 @@
+version: '3'
+
+services:
+
+  # shard a replica set
+  shard-a-01:
+    hostname: shard-a-01
+    container_name: shard-a-01
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30001:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-a/01:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-a", "--dbpath", "/data/db"]
+
+  shard-a-02:
+    hostname: shard-a-02
+    container_name: shard-a-02
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30002:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-a/02:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-a", "--dbpath", "/data/db"]
+
+  shard-a-03:
+    hostname: shard-a-03
+    container_name: shard-a-03
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30003:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-a/03:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-a", "--dbpath", "/data/db"]
+
+  # shard b replica set
+  shard-b-01:
+    hostname: shard-b-01
+    container_name: shard-b-01
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30011:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-b/01:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-b", "--dbpath", "/data/db"]
+
+  shard-b-02:
+    hostname: shard-b-02
+    container_name: shard-b-02
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30012:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-b/02:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-b", "--dbpath", "/data/db"]
+
+  shard-b-03:
+    hostname: shard-b-03
+    container_name: shard-b-03
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27018
+    ports:
+      - 30013:27018
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-b/03:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--shardsvr", "--replSet", "rs-b", "--dbpath", "/data/db"]
+
+  # config servers replica set
+  config-01:
+    hostname: config-01
+    container_name: config-01
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27019
+    ports:
+      - 30021:27019
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-cfg/01:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--configsvr", "--replSet", "rs-cfg", "--dbpath", "/data/db"]
+
+  config-02:
+    hostname: config-02
+    container_name: config-02
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27019
+    ports:
+      - 30022:27019
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-cfg/02:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--configsvr", "--replSet", "rs-cfg", "--dbpath", "/data/db"]
+
+  config-03:
+    hostname: config-03
+    container_name: config-03
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27019
+    ports:
+      - 30023:27019
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+      - ~/mongo-cluster/rs-cfg/03:/data/db
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--configsvr", "--replSet", "rs-cfg", "--dbpath", "/data/db"]
+
+  # mongos(router)
+  router:
+    hostname: router
+    container_name: router
+    image: mongo:latest
+    networks:
+      - mongo-cluster
+    expose:
+      - 27017
+    ports:
+      - 30031:27017
+    restart: always
+    volumes:
+      - ./scripts:/scripts
+    # the following didn't work (container kept restarting complaining that it doesn't know the --configdb option), so I solved it using "command: mongos [...]"
+    #entrypoint: ["/usr/bin/mongos", "--bind_ip_all", "--configdb rs-cfg/config-01:27019,config-02:27019,config-03:27019"]
+    command: mongos --bind_ip_all --configdb rs-cfg/config-01:27019,config-02:27019,config-03:27019
+    depends_on:
+      - shard-a-01
+      - shard-a-02
+      - shard-a-03
+      - shard-b-01
+      - shard-b-02
+      - shard-b-03
+      - config-01
+      - config-02
+      - config-03
+
+networks:
+  mongo-cluster:

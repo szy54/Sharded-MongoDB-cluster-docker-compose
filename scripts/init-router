@@ -1,0 +1,6 @@
+sh.addShard(
+    "rs-a/shard-a-01:27018,shard-a-02:27018,shard-a-03:27018"
+)
+sh.addShard(
+    "rs-b/shard-b-01:27018,shard-b-02:27018,shard-b-03:27018"
+)
