@@ -20,6 +20,7 @@ docker-compose up -d
 sh init.sh
 ```
 The `sleep 20` in a script is for the replica sets to let them elect the primary.
+
 3. **You can verify replica sets and shards using:**
 `rs-a`:
 ```
