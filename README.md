@@ -22,6 +22,7 @@ sh init.sh
 The `sleep 20` in a script is for the replica sets to let them elect the primary.
 
 3. **You can verify replica sets and shards using:**
+
 `rs-a`:
 ```
 docker-compose exec shard-a-01 sh -c "mongo --port 27018"
@@ -54,7 +55,7 @@ docker-compose down
 ```
 
 ### How to connect
-You must finish the configuration for **your database** following [this doc](https://docs.mongodb.com/v4.2/tutorial/deploy-shard-cluster/#enable-sharding-for-a-database)
+You must finish the configuration for **your database** following [this doc](https://docs.mongodb.com/v4.2/tutorial/deploy-shard-cluster/#enable-sharding-for-a-database) i.e. **Enable Sharding for a Database** and **Shard a Collection**
 
 For Read/Write operations you should use only the router([official docs](https://docs.mongodb.com/manual/sharding/#connecting-to-a-sharded-cluster)). 
 You have the router's mongo port translated to *localhost:30031*, so to connect to a mongo shell:
